@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>財務デューデリジェンス報告書 - 株式会社ゼネスネットワーク</title>
+<style>
+  :root {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #111111;
+    --bg-card: #161616;
+    --bg-table-head: #1a1a1a;
+    --border: #2a2a2a;
+    --accent: #c9a84c;
+    --accent-dim: #8a6e2f;
+    --accent-glow: rgba(201,168,76,0.15);
+    --text-primary: #e8e8e8;
+    --text-secondary: #999999;
+    --text-muted: #555555;
+    --positive: #4ade80;
+    --negative: #f87171;
+    --tab-active-bg: #1e1a0e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Hiragino Kaku Gothic Pro','Noto Sans JP','Yu Gothic',sans-serif;
+    font-size: 13px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+  .header {
+    background: linear-gradient(135deg,#0f0c02 0%,#1a140a 50%,#0f0c02 100%);
+    border-bottom: 1px solid var(--accent-dim);
+    padding: 40px 60px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+    background:radial-gradient(ellipse at 20% 50%,rgba(201,168,76,0.06) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .header-badge {
+    display:inline-block;border:1px solid var(--accent-dim);color:var(--accent);
+    font-size:10px;letter-spacing:2px;padding:3px 10px;margin-bottom:16px;text-transform:uppercase;
+  }
+  .header h1 { font-size:26px;font-weight:700;color:var(--accent);letter-spacing:1px;margin-bottom:6px; }
+  .header h2 { font-size:14px;font-weight:400;color:var(--text-secondary);margin-bottom:20px; }
+  .header-meta { display:flex;gap:32px;flex-wrap:wrap; }
+  .header-meta-item { display:flex;flex-direction:column; }
+  .header-meta-label { font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px; }
+  .header-meta-value { font-size:12px;color:var(--text-secondary); }
+  .confidential-badge {
+    position:absolute;top:32px;right:60px;border:1px solid #f87171;color:#f87171;
+    font-size:10px;letter-spacing:3px;padding:4px 12px;text-transform:uppercase;opacity:0.7;
+  }
+  .tabs-wrapper {
+    background:var(--bg-secondary);border-bottom:1px solid var(--border);
+    position:sticky;top:0;z-index:100;overflow-x:auto;white-space:nowrap;
+  }
+  .tabs-wrapper::-webkit-scrollbar{height:3px;}
+  .tabs-wrapper::-webkit-scrollbar-track{background:var(--bg-secondary);}
+  .tabs-wrapper::-webkit-scrollbar-thumb{background:var(--accent-dim);}
+  .tabs { display:inline-flex;min-width:100%; }
+  .tab-btn {
+    padding:14px 24px;font-size:12px;font-family:inherit;color:var(--text-muted);
+    background:transparent;border:none;border-bottom:2px solid transparent;
+    cursor:pointer;transition:all 0.2s;white-space:nowrap;letter-spacing:0.5px;
+  }
+  .tab-btn:hover{color:var(--text-primary);background:rgba(255,255,255,0.03);}
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--tab-active-bg);font-weight:600;}
+  .tab-btn .tab-num{font-size:9px;margin-right:6px;opacity:0.6;letter-spacing:1px;}
+  .content{max-width:1100px;margin:0 auto;padding:40px 40px 80px;}
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;}
+  .chapter-title{display:flex;align-items:center;gap:16px;margin-bottom:32px;}
+  .chapter-number{font-size:11px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;opacity:0.7;}
+  .chapter-title h2{font-size:22px;font-weight:700;color:var(--text-primary);}
+  .chapter-title-line{flex:1;height:1px;background:linear-gradient(to right,var(--accent-dim),transparent);}
+  .section-title {
+    font-size:14px;font-weight:700;color:var(--accent);margin:36px 0 16px;
+    padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;
+  }
+  .section-title::before{content:'';display:inline-block;width:3px;height:14px;background:var(--accent);border-radius:2px;}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:24px;margin-bottom:20px;}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:20px;}
+  .kv-grid{display:grid;grid-template-columns:160px 1fr;gap:10px 0;}
+  .kv-label{font-size:11px;color:var(--text-muted);padding:6px 0;border-bottom:1px solid #1c1c1c;display:flex;align-items:center;}
+  .kv-value{font-size:12px;color:var(--text-primary);padding:6px 12px;border-bottom:1px solid #1c1c1c;}
+  .table-wrap{overflow-x:auto;margin-bottom:20px;}
+  .table-wrap::-webkit-scrollbar{height:4px;}
+  .table-wrap::-webkit-scrollbar-track{background:#111;}
+  .table-wrap::-webkit-scrollbar-thumb{background:var(--accent-dim);border-radius:2px;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  thead th{background:var(--bg-table-head);color:var(--accent);font-weight:600;padding:10px 12px;text-align:right;border:1px solid var(--border);white-space:nowrap;letter-spacing:0.3px;}
+  thead th:first-child{text-align:left;}
+  tbody td{padding:8px 12px;border:1px solid #1e1e1e;text-align:right;color:var(--text-primary);white-space:nowrap;}
+  tbody td:first-child{text-align:left;color:var(--text-secondary);}
+  tbody tr:nth-child(even){background:rgba(255,255,255,0.015);}
+  tbody tr:hover{background:rgba(201,168,76,0.04);}
+  .row-total td{background:rgba(201,168,76,0.07)!important;color:var(--accent)!important;font-weight:700;border-top:1px solid var(--accent-dim);}
+  .row-total td:first-child{color:var(--accent)!important;}
+  .row-section td{background:#131313;color:var(--text-muted);font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-color:#1a1a1a;}
+  .negative-val{color:var(--negative)!important;}
+  .positive-val{color:var(--positive)!important;}
+  .analysis-box{background:rgba(201,168,76,0.04);border-left:3px solid var(--accent-dim);padding:14px 18px;margin:16px 0;font-size:12px;color:var(--text-secondary);line-height:1.8;}
+  .analysis-box .analysis-label{font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-weight:600;}
+  .metric-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;}
+  .metric-card{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:18px 20px;text-align:center;}
+  .metric-card.highlight{border-color:var(--accent-dim);background:linear-gradient(135deg,#1a1503,#111100);}
+  .metric-label{font-size:10px;color:var(--text-muted);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase;}
+  .metric-value{font-size:20px;font-weight:700;color:var(--accent);}
+  .metric-sub{font-size:10px;color:var(--text-muted);margin-top:4px;}
+  .eval-box{background:linear-gradient(135deg,#0f1a10,#0a120a);border:1px solid #2d4a2d;border-radius:6px;padding:24px 28px;margin:20px 0;text-align:center;}
+  .eval-label{font-size:11px;color:#4ade80;letter-spacing:2px;margin-bottom:12px;}
+  .eval-formula{font-size:16px;color:var(--text-primary);font-weight:600;letter-spacing:1px;}
+  .eval-result{font-size:28px;font-weight:700;color:#4ade80;margin-top:8px;}
+  .synergy-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+  .synergy-item{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:18px 20px;}
+  .synergy-item h4{font-size:12px;color:var(--accent);margin-bottom:8px;font-weight:600;}
+  .synergy-item p{font-size:12px;color:var(--text-secondary);line-height:1.7;}
+  .concern-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .concern-item{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid #f59e0b;border-radius:0 6px 6px 0;padding:14px 16px;font-size:12px;color:var(--text-secondary);line-height:1.7;}
+  .concern-item.critical{border-left-color:var(--negative);}
+  .timeline{position:relative;padding-left:24px;margin:20px 0;}
+  .timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,var(--accent-dim),transparent);}
+  .timeline-item{position:relative;padding:12px 0 12px 24px;border-bottom:1px solid #1a1a1a;}
+  .timeline-item::before{content:'';position:absolute;left:-18px;top:18px;width:8px;height:8px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent);}
+  .timeline-item.milestone::before{background:var(--accent);width:10px;height:10px;left:-19px;}
+  .timeline-date{font-size:11px;color:var(--accent);font-weight:600;letter-spacing:1px;}
+  .timeline-desc{font-size:12px;color:var(--text-secondary);margin-top:4px;}
+  .license-row{display:grid;grid-template-columns:200px 1fr;gap:0;margin-bottom:1px;}
+  .license-key{background:#151515;padding:10px 14px;color:var(--text-muted);font-size:11px;border:1px solid var(--border);}
+  .license-val{padding:10px 14px;color:var(--text-primary);font-size:12px;border:1px solid var(--border);border-left:none;}
+  .flow-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+  .flow-box{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:18px;}
+  .flow-box h4{font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  .flow-item{font-size:12px;color:var(--text-secondary);padding:4px 0;display:flex;gap:8px;}
+  .flow-item::before{content:'›';color:var(--accent-dim);}
+  @media(max-width:700px){
+    .header{padding:24px 20px;}
+    .content{padding:24px 16px 60px;}
+    .synergy-grid,.concern-grid,.flow-grid{grid-template-columns:1fr;}
+    .confidential-badge{display:none;}
+    .kv-grid{grid-template-columns:120px 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">Financial Due Diligence Report</div>
+  <div class="confidential-badge">Confidential</div>
+  <h1>財務デューデリジェンス報告書</h1>
+  <h2>対象会社：株式会社ゼネスネットワーク</h2>
+  <div class="header-meta">
+    <div class="header-meta-item">
+      <span class="header-meta-label">作成日</span>
+      <span class="header-meta-value">2026年3月17日</span>
+    </div>
+    <div class="header-meta-item">
+      <span class="header-meta-label">作成者</span>
+      <span class="header-meta-value">10X株式会社 事業戦略室</span>
+    </div>
+    <div class="header-meta-item">
+      <span class="header-meta-label">準拠様式</span>
+      <span class="header-meta-value">J-map（日本M&Aアドバイザー協会）標準様式</span>
+    </div>
+  </div>
+</div>
+
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('tab0',this)"><span class="tab-num">概要</span>サマリー</button>
+    <button class="tab-btn" onclick="showTab('tab1',this)"><span class="tab-num">第1章</span>企業概要</button>
+    <button class="tab-btn" onclick="showTab('tab2',this)"><span class="tab-num">第2章</span>資産価値の検証</button>
+    <button class="tab-btn" onclick="showTab('tab3',this)"><span class="tab-num">第3章</span>事業性の検証</button>
+    <button class="tab-btn" onclick="showTab('tab4',this)"><span class="tab-num">第4章</span>収益性の検証</button>
+    <button class="tab-btn" onclick="showTab('tab5',this)"><span class="tab-num">シナジー</span>シナジー効果</button>
+    <button class="tab-btn" onclick="showTab('tab6',this)"><span class="tab-num">懸念</span>懸念リスク</button>
+    <button class="tab-btn" onclick="showTab('tab7',this)"><span class="tab-num">計画</span>スケジュール</button>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- TAB 0: SUMMARY -->
+<div id="tab0" class="tab-pane active">
+  <div class="chapter-title">
+    <span class="chapter-number">Overview</span>
+    <h2>エグゼクティブサマリー</h2>
+    <div class="chapter-title-line"></div>
+  </div>
+  <div class="metric-row">
+    <div class="metric-card highlight">
+      <div class="metric-label">純資産評価額（再評価後）</div>
+      <div class="metric-value">17,884,998円</div>
+      <div class="metric-sub">2025/4月期基準</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">売上高（2025/4期）</div>
+      <div class="metric-value">1.67億円</div>
+      <div class="metric-sub">前期比 △14.2%</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">売上総利益率（2025/4期）</div>
+      <div class="metric-value">52.8%</div>
+      <div class="metric-sub">材料費＋外注費ベース</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">従業員数</div>
+      <div class="metric-value">7名</div>
+      <div class="metric-sub">役員含まず</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">設立</div>
+      <div class="metric-value">1999年</div>
+      <div class="metric-sub">社歴26年</div>
+    </div>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="section-title">対象会社概要</div>
+      <div class="kv-grid">
+        <span class="kv-label">商号</span><span class="kv-value">株式会社ゼネスネットワーク</span>
+        <span class="kv-label">所在地</span><span class="kv-value">埼玉県戸田市美女木北3-14-11</span>
+        <span class="kv-label">代表者</span><span class="kv-value">代表取締役 金子 充剛（58歳・創業者）</span>
+        <span class="kv-label">資本金</span><span class="kv-value">1,000万円</span>
+        <span class="kv-label">事業内容</span><span class="kv-value">ネットワーク・電気設備の設計、施工、保守</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">DDの主要論点</div>
+      <div class="concern-item critical" style="margin-bottom:8px">売上3期連続減少（2023→2025年：△34%）<br>2026年はさらに約25〜30%減を見込む</div>
+      <div class="concern-item" style="margin-bottom:8px">創業者の健康リスク（2025年心筋梗塞）<br>後継者不在が喫緊の課題</div>
+      <div class="concern-item" style="margin-bottom:8px">マルチテレコム株式を△1,013万円で評価<br>売掛金に長年未回収分385万円あり</div>
+      <div class="concern-item">役員退職金2,000万円（2029/4期計上予定）<br>プロパー融資の簿外借入4,500万円あり</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">事業承継スケジュール概要</div>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-date">2026年2月</div><div class="timeline-desc">財務デューデリジェンス</div></div>
+      <div class="timeline-item"><div class="timeline-date">2026年4月</div><div class="timeline-desc">合意検討開始（詳細協議・条件調整）</div></div>
+      <div class="timeline-item milestone"><div class="timeline-date">2026年6月</div><div class="timeline-desc">最終合意</div></div>
+      <div class="timeline-item milestone"><div class="timeline-date">2026年8月</div><div class="timeline-desc">官報公告及び手続き</div></div>
+      <div class="timeline-item milestone"><div class="timeline-date">2026年9月</div><div class="timeline-desc">譲渡成立</div></div>
+      <div class="timeline-item"><div class="timeline-date">2026年9月</div><div class="timeline-desc">相木氏 常務取締役としてJoin</div></div>
+      <div class="timeline-item"><div class="timeline-date">2027年4月</div><div class="timeline-desc">10X若手派遣及び人事交流</div></div>
+      <div class="timeline-item"><div class="timeline-date">2029年4月</div><div class="timeline-desc">金子氏定年退任</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 1: CHAPTER 1 -->
+<div id="tab1" class="tab-pane">
+  <div class="chapter-title">
+    <span class="chapter-number">Chapter 01</span>
+    <h2>企業概要</h2>
+    <div class="chapter-title-line"></div>
+  </div>
+
+  <div class="section-title">1.1 基本事項</div>
+  <div class="card">
+    <div class="kv-grid">
+      <span class="kv-label">商号</span><span class="kv-value">株式会社ゼネスネットワーク（Zenes Network Co., Ltd.）</span>
+      <span class="kv-label">所在地</span><span class="kv-value">埼玉県戸田市美女木北3-14-11</span>
+      <span class="kv-label">代表者</span><span class="kv-value">代表取締役 金子 充剛（1967年生・現58歳・創業者）</span>
+      <span class="kv-label">設立</span><span class="kv-value">1999年7月</span>
+      <span class="kv-label">資本金</span><span class="kv-value">1,000万円</span>
+      <span class="kv-label">事業内容</span><span class="kv-value">ネットワーク設備の設計、施工、保守 / 電気設備の設計、施工、保守</span>
+      <span class="kv-label">従業員数</span><span class="kv-value">7名（役員含まず）</span>
+    </div>
+  </div>
+
+  <div class="section-title">1.2 株主構成 / 役員構成</div>
+  <div class="card-grid">
+    <div class="card">
+      <div style="font-size:11px;color:var(--accent);letter-spacing:1px;margin-bottom:12px;">株主構成</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="text-align:left">氏名</th><th>持株数</th><th>持株割合</th><th>議決権数</th><th>議決権割合</th></tr></thead>
+          <tbody>
+            <tr><td>金子 充剛</td><td>30株</td><td>50%</td><td>30個</td><td>50%</td></tr>
+            <tr><td>金子 英子</td><td>30株</td><td>50%</td><td>30個</td><td>50%</td></tr>
+            <tr class="row-total"><td>合計</td><td>60株</td><td>100%</td><td>60個</td><td>100%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:11px;color:var(--accent);letter-spacing:1px;margin-bottom:12px;">役員構成</div>
+      <div class="concern-item" style="border-left-color:var(--accent)">
+        <strong style="color:var(--text-primary)">代表取締役：金子 充剛（創業者） 1名</strong><br><br>
+        1999年の創業以来、25年以上にわたり会社を牽引。技術・営業の両面において事業の根幹を支える存在。<br><br>
+        <span style="color:var(--negative)">2025年心筋梗塞により療養。現在復帰済みだが、後継者不在で事業継承が喫緊の課題。</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">1.3 社員の状況</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align:left">氏名</th><th style="text-align:left">役職</th>
+          <th style="text-align:left">生年月日</th><th>年齢</th>
+          <th style="text-align:left">入社年月日</th><th>社歴</th>
+          <th style="text-align:left">住所</th><th style="text-align:left">役割</th><th style="text-align:left">資格</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>金子 充剛</td><td>代表取締役</td><td>1967/11/12</td><td>58才</td><td>1999/07/31</td><td>26年</td><td>埼玉県川口市</td><td>経営責任者/専技（通信）</td><td>—</td></tr>
+        <tr><td>鈴木 康寛</td><td>部長</td><td>1973/01/27</td><td>53才</td><td>2001/04/01</td><td>24年</td><td>埼玉県さいたま市</td><td>現場・事務（図面・完成図書）</td><td>通信1級/電気1級</td></tr>
+        <tr><td>逆井 春彦</td><td>課長</td><td>1973/07/22</td><td>52才</td><td>2001/10/01</td><td>24年</td><td>東京都足立区</td><td>現場 – ネットワン中心</td><td>—</td></tr>
+        <tr><td>斉藤 善行</td><td>主任</td><td>1978/09/21</td><td>47才</td><td>2005/06/01</td><td>20年</td><td>東京都足立区</td><td>現場 – 大学案件</td><td>—</td></tr>
+        <tr><td>川嶋 淳子</td><td>—</td><td>1965/11/20</td><td>60才</td><td>2008/09/01</td><td>17年</td><td>東京都清瀬市</td><td>金庫番/サーベイ</td><td>—</td></tr>
+        <tr><td>三瓶 博昭</td><td>—</td><td>1990/10/01</td><td>35才</td><td>2016/09/01</td><td>9年</td><td>埼玉県さいたま市</td><td>現場 – ネットワン中心</td><td>電気工事士</td></tr>
+        <tr><td>藤田 博行</td><td>—</td><td>1975/06/12</td><td>50才</td><td>2008/01/01</td><td>18年</td><td>東京都江東区</td><td>出向 – 埼玉アンテナ（Jcom）</td><td>—</td></tr>
+        <tr><td>真柄 基雄</td><td>—</td><td>1976/03/21</td><td>49才</td><td>2017/07/01</td><td>8年</td><td>東京都江戸川区</td><td>倉庫番/稀に現場</td><td>—</td></tr>
+        <tr style="opacity:0.5"><td>金子 英子</td><td>—</td><td>1967/07/21</td><td>58才</td><td>1999/07/31</td><td>26年</td><td>埼玉県川口市</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">1.4 ライセンス・フロー</div>
+  <div class="card">
+    <div class="license-row"><div class="license-key">建設業許可</div><div class="license-val">一般建設業許可（電気・電気通信）</div></div>
+    <div class="license-row"><div class="license-key">経営管理責任者</div><div class="license-val">金子 充剛</div></div>
+    <div class="license-row"><div class="license-key">専任技術者（電気）</div><div class="license-val">鈴木 康寛（1級電気設備施工管理技士）</div></div>
+    <div class="license-row"><div class="license-key">専任技術者（通信）</div><div class="license-val">金子 充剛（実務経験）</div></div>
+  </div>
+  <div class="flow-grid">
+    <div class="flow-box">
+      <h4>会計フロー</h4>
+      <div class="flow-item">材料・外注：月末締め 翌月末支払 振込</div>
+      <div class="flow-item">精算：都度現金払い（川嶋担当）</div>
+      <div class="flow-item">伝票作成：川嶋 → チェック：金子姉 → 反映：税理士</div>
+      <div class="flow-item">会計ソフト：不明</div>
+    </div>
+    <div class="flow-box">
+      <h4>労務フロー</h4>
+      <div class="flow-item">給料：月末締め 翌月10日支払 振込</div>
+      <div class="flow-item">通勤費：5名支給</div>
+      <div class="flow-item">タイムカードなし（エクセル管理）</div>
+      <div class="flow-item">労務ソフト：不明</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: CHAPTER 2 -->
+<div id="tab2" class="tab-pane">
+  <div class="chapter-title">
+    <span class="chapter-number">Chapter 02</span>
+    <h2>資産価値の検証</h2>
+    <div class="chapter-title-line"></div>
+  </div>
+
+  <div class="section-title">2.1 ３期比較貸借対照表（B/S）</div>
+  <div class="card-grid">
+    <div class="card">
+      <div style="font-size:11px;color:var(--accent);letter-spacing:1px;margin-bottom:12px;">資産の部</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="text-align:left">科目</th><th>2023/4期</th><th>2024/4期</th><th>2025/4期</th></tr></thead>
+          <tbody>
+            <tr class="row-section"><td colspan="4">流動資産</td></tr>
+            <tr><td>現金預金</td><td>75,548,416</td><td>64,933,750</td><td>50,565,316</td></tr>
+            <tr><td>売掛金</td><td>17,869,531</td><td>16,782,730</td><td>17,860,928</td></tr>
+            <tr><td>未成工事支出金</td><td>2,192,000</td><td>791,025</td><td>11,015,000</td></tr>
+            <tr><td>貯蔵品</td><td>4,495,817</td><td>4,915,480</td><td>5,063,166</td></tr>
+            <tr><td>前払費用</td><td>229,000</td><td>229,000</td><td>253,000</td></tr>
+            <tr class="row-total"><td>流動資産 計</td><td>100,334,764</td><td>87,651,985</td><td>84,757,410</td></tr>
+            <tr class="row-section"><td colspan="4">固定資産</td></tr>
+            <tr><td>車両運搬具</td><td>7,415,586</td><td>5,028,762</td><td>3,179,972</td></tr>
+            <tr><td>工具器具備品</td><td>976,867</td><td>524,454</td><td>165,360</td></tr>
+            <tr><td>投資有価証券</td><td>12,583,942</td><td>14,050,000</td><td>15,850,000</td></tr>
+            <tr><td>出資金</td><td>70,000</td><td>70,000</td><td>70,000</td></tr>
+            <tr><td>敷金（差入保証金）</td><td>1,506,000</td><td>1,506,000</td><td>1,506,000</td></tr>
+            <tr><td>保険積立金</td><td>1,643,036</td><td>1,851,729</td><td>2,136,477</td></tr>
+            <tr class="row-total"><td>固定資産 計</td><td>24,345,115</td><td>23,130,879</td><td>23,007,743</td></tr>
+            <tr class="row-total"><td>資産合計</td><td>124,679,879</td><td>110,782,864</td><td>107,765,153</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:11px;color:var(--accent);letter-spacing:1px;margin-bottom:12px;">負債・純資産の部</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="text-align:left">科目</th><th>2023/4期</th><th>2024/4期</th><th>2025/4期</th></tr></thead>
+          <tbody>
+            <tr class="row-section"><td colspan="4">流動負債</td></tr>
+            <tr><td>買掛金</td><td>2,598,886</td><td>661,700</td><td>98,280</td></tr>
+            <tr><td>未払費用</td><td>13,002,553</td><td>7,406,035</td><td>10,163,628</td></tr>
+            <tr><td>未払法人税等</td><td>10,046,400</td><td>645,000</td><td>205,000</td></tr>
+            <tr><td>預り金</td><td>2,606,416</td><td>1,845,976</td><td>960,341</td></tr>
+            <tr class="row-total"><td>流動負債 計</td><td>35,861,831</td><td>14,361,402</td><td>12,708,738</td></tr>
+            <tr class="row-section"><td colspan="4">固定負債</td></tr>
+            <tr><td>長期借入金</td><td>30,000,000</td><td>31,560,000</td><td>26,280,000</td></tr>
+            <tr class="row-total"><td>固定負債 計</td><td>30,000,000</td><td>31,560,000</td><td>26,280,000</td></tr>
+            <tr class="row-total"><td>負債合計</td><td>65,861,831</td><td>45,921,402</td><td>38,988,738</td></tr>
+            <tr class="row-section"><td colspan="4">純資産</td></tr>
+            <tr><td>資本金</td><td>10,000,000</td><td>10,000,000</td><td>10,000,000</td></tr>
+            <tr><td>利益剰余金</td><td>47,818,048</td><td>53,861,462</td><td>57,776,415</td></tr>
+            <tr><td>別途積立金</td><td>1,000,000</td><td>1,000,000</td><td>1,000,000</td></tr>
+            <tr class="row-total"><td>純資産合計</td><td>58,818,048</td><td>64,861,462</td><td>68,776,415</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">2.2 直前期（2025/4期）再評価B/S</div>
+  <div class="card-grid">
+    <div class="card">
+      <div style="font-size:11px;color:var(--accent);letter-spacing:1px;margin-bottom:12px;">資産の部</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="text-align:left">科目</th><th>簿価</th><th>評価差額</th><th>評価残高</th></tr></thead>
+          <tbody>
+            <tr><td>現金預金</td><td>50,565,316</td><td>0</td><td>50,565,316</td></tr>
+            <tr><td>売掛金</td><td>17,860,928</td><td class="negative-val">△3,247,258</td><td>14,045,878</td></tr>
+            <tr><td>未成工事支出金</td><td>11,015,000</td><td class="negative-val">△9,515,000</td><td>1,500,000</td></tr>
+            <tr><td>貯蔵品</td><td>5,063,166</td><td>0</td><td>5,063,166</td></tr>
+            <tr><td>前払費用</td><td>253,000</td><td>0</td><td>253,000</td></tr>
+            <tr class="row-total"><td>流動資産</td><td>84,757,410</td><td class="negative-val">△12,762,258</td><td>71,995,152</td></tr>
+            <tr><td>車両運搬具</td><td>3,179,972</td><td>0</td><td>3,179,972</td></tr>
+            <tr><td>投資有価証券</td><td>15,850,000</td><td class="negative-val">△18,129,159</td><td class="negative-val">△2,279,159</td></tr>
+            <tr><td>その他固定資産</td><td>3,977,771</td><td>0</td><td>3,977,771</td></tr>
+            <tr class="row-total"><td>固定資産</td><td>23,007,743</td><td class="negative-val">△18,129,159</td><td>4,878,584</td></tr>
+            <tr class="row-total"><td>資産合計</td><td>107,765,153</td><td class="negative-val">△30,891,417</td><td>76,873,736</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:11px;color:var(--accent);letter-spacing:1px;margin-bottom:12px;">負債の部</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="text-align:left">科目</th><th>簿価</th><th>評価差額</th><th>評価残高</th></tr></thead>
+          <tbody>
+            <tr><td>買掛金</td><td>98,280</td><td>0</td><td>98,280</td></tr>
+            <tr><td>未払費用</td><td>10,163,628</td><td>0</td><td>10,163,628</td></tr>
+            <tr><td>未払法人税等</td><td>205,000</td><td>0</td><td>205,000</td></tr>
+            <tr><td>その他流動負債</td><td>2,241,830</td><td>0</td><td>2,241,830</td></tr>
+            <tr class="row-total"><td>流動負債</td><td>12,708,738</td><td>0</td><td>12,708,738</td></tr>
+            <tr><td>長期借入金</td><td>26,280,000</td><td>0</td><td>26,280,000</td></tr>
+            <tr class="row-total"><td>固定負債</td><td>26,280,000</td><td>0</td><td>26,280,000</td></tr>
+            <tr><td>役員退職金（引当）</td><td>0</td><td class="negative-val">20,000,000</td><td>20,000,000</td></tr>
+            <tr class="row-total"><td>負債合計</td><td>38,988,738</td><td class="negative-val">20,000,000</td><td>58,988,738</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="eval-box" style="margin-top:16px">
+        <div class="eval-label">純資産の評価額</div>
+        <div class="eval-formula">76,873,736 円 － 58,988,738 円</div>
+        <div class="eval-result">＝ 17,884,998 円</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">2.3 売掛金の再評価詳細</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="text-align:left">相手先</th><th>2023/4期</th><th>2024/4期</th><th>2025/4期</th><th>修正額</th><th>修正後残高</th><th style="text-align:left">備考</th></tr></thead>
+      <tbody>
+        <tr><td>ネットワン</td><td>4,130,500</td><td>2,272,600</td><td>6,100,600</td><td>0</td><td>6,100,600</td><td>—</td></tr>
+        <tr><td>埼玉アンテナ</td><td>757,680</td><td>773,080</td><td>688,380</td><td>0</td><td>688,380</td><td>—</td></tr>
+        <tr><td>NSK</td><td>6,127,000</td><td>77,000</td><td>165,000</td><td>0</td><td>165,000</td><td>—</td></tr>
+        <tr><td>岡田電機</td><td>388,300</td><td>5,024,800</td><td>642,400</td><td>0</td><td>642,400</td><td>—</td></tr>
+        <tr><td>アスビレーション</td><td>0</td><td>0</td><td>4,617,998</td><td>0</td><td>4,617,998</td><td>—</td></tr>
+        <tr><td>10X</td><td>0</td><td>0</td><td>1,243,000</td><td>0</td><td>1,243,000</td><td>—</td></tr>
+        <tr><td class="negative-val">マルチテレコム</td><td>3,531,150</td><td>3,531,150</td><td>3,531,150</td><td class="negative-val">△3,531,150</td><td class="negative-val">0</td><td>長年未回収</td></tr>
+        <tr><td class="negative-val">行島武良</td><td>283,900</td><td>283,900</td><td>283,900</td><td class="negative-val">△283,900</td><td class="negative-val">0</td><td>長年未回収</td></tr>
+        <tr class="row-total"><td>帳簿合計</td><td>17,869,531</td><td>16,782,730</td><td>17,860,928</td><td class="negative-val">△3,815,050</td><td>14,045,878</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="analysis-box">
+    <div class="analysis-label">分析コメント</div>
+    マルチテレコム（子会社）・行島武良の売掛金が3年以上未回収。回収不可と判断し売掛残高を修正。
+  </div>
+
+  <div class="section-title">2.3 投資有価証券の再評価詳細</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="text-align:left">銘柄</th><th>2023/4期</th><th>2024/4期</th><th>2025/4期</th><th>修正額</th><th>修正後残高</th><th style="text-align:left">備考</th></tr></thead>
+      <tbody>
+        <tr><td class="negative-val">マルチテレコム株式</td><td>10,000,000</td><td>10,000,000</td><td>10,000,000</td><td class="negative-val">△20,139,159</td><td class="negative-val">△10,139,159</td><td>子会社純資産評価</td></tr>
+        <tr><td>しんきんSP</td><td>2,583,942</td><td>1,050,000</td><td>1,650,000</td><td class="positive-val">330,000</td><td>1,980,000</td><td>+20%UP想定</td></tr>
+        <tr><td>ゴールドファンド</td><td>0</td><td>1,500,000</td><td>2,100,000</td><td class="positive-val">1,680,000</td><td>3,780,000</td><td>+80%UP想定</td></tr>
+        <tr><td>ダイワインド株ファンド</td><td>0</td><td>1,500,000</td><td>2,100,000</td><td>0</td><td>2,100,000</td><td>±0%想定</td></tr>
+        <tr class="row-total"><td>合計</td><td>12,583,942</td><td>14,050,000</td><td>15,850,000</td><td class="negative-val">△18,129,159</td><td class="negative-val">△2,279,159</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">2.3 マルチテレコムネット B/S（子会社）</div>
+  <div class="card-grid">
+    <div class="card">
+      <div style="font-size:11px;color:var(--accent);letter-spacing:1px;margin-bottom:12px;">資産の部（2025/8月期）</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="text-align:left">科目</th><th>簿価</th><th>評価差額</th><th>評価残高</th></tr></thead>
+          <tbody>
+            <tr class="row-section"><td colspan="4">流動資産</td></tr>
+            <tr><td>現金</td><td>943,704</td><td>0</td><td>943,704</td></tr>
+            <tr><td>預金（城北信用金庫）</td><td>2,163,103</td><td>0</td><td>2,163,103</td></tr>
+            <tr><td>売掛金</td><td>1</td><td class="negative-val">△1</td><td>0</td></tr>
+            <tr><td>貯蔵品</td><td>0</td><td>0</td><td>0</td></tr>
+            <tr><td>前払費用</td><td>0</td><td>0</td><td>0</td></tr>
+            <tr class="row-total"><td>流動資産 計</td><td>3,106,808</td><td class="negative-val">△1</td><td>3,106,807</td></tr>
+            <tr class="row-section"><td colspan="4">固定資産</td></tr>
+            <tr><td>車両運搬具</td><td>1</td><td class="negative-val">△1</td><td>0</td></tr>
+            <tr><td>その他固定資産</td><td>0</td><td>0</td><td>0</td></tr>
+            <tr class="row-total"><td>固定資産 計</td><td>1</td><td class="negative-val">△1</td><td>0</td></tr>
+            <tr class="row-total"><td>資産合計</td><td>3,106,809</td><td class="negative-val">△2</td><td>3,106,807</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:11px;color:var(--accent);letter-spacing:1px;margin-bottom:12px;">負債の部（2025/4月期）</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="text-align:left">科目</th><th>簿価</th><th>評価差額</th><th>評価残高</th></tr></thead>
+          <tbody>
+            <tr class="row-section"><td colspan="4">流動負債</td></tr>
+            <tr><td>買掛金（ゼネス）</td><td>3,531,150</td><td>0</td><td>3,531,150</td></tr>
+            <tr><td>短期借入金（金子充剛）</td><td>184,741</td><td>0</td><td>184,741</td></tr>
+            <tr><td>未払金（金子充剛）</td><td>3,522,175</td><td>0</td><td>3,522,175</td></tr>
+            <tr><td>未払法人税等</td><td>526,200</td><td>0</td><td>526,200</td></tr>
+            <tr><td>未払消費税等</td><td>31,700</td><td>0</td><td>31,700</td></tr>
+            <tr class="row-total"><td>流動負債 計</td><td>7,795,966</td><td>0</td><td>7,795,966</td></tr>
+            <tr class="row-section"><td colspan="4">固定負債</td></tr>
+            <tr><td>長期借入金（金子充剛）</td><td>4,250,000</td><td>0</td><td>4,250,000</td></tr>
+            <tr><td>長期借入金（ハイアーネット）</td><td>1,200,000</td><td>0</td><td>1,200,000</td></tr>
+            <tr class="row-total"><td>固定負債 計</td><td>5,450,000</td><td>0</td><td>5,450,000</td></tr>
+            <tr class="row-total"><td>負債合計</td><td>13,245,966</td><td>0</td><td>13,245,966</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="eval-box" style="margin-top:16px;background:linear-gradient(135deg,#1a0a0a,#110808);border-color:#4a2d2d;">
+        <div class="eval-label" style="color:var(--negative)">純資産の評価額</div>
+        <div class="eval-formula">3,106,807 円 － 13,245,966 円</div>
+        <div class="eval-result" style="color:var(--negative)">＝ △10,139,159 円</div>
+      </div>
+    </div>
+  </div>
+  <div class="analysis-box">
+    <div class="analysis-label">分析コメント</div>
+    マルチテレコムネットは債務超過（△1,013万円）。主な負債はゼネスへの買掛金353万円、金子充剛氏への借入・未払金合計796万円。赤字理由の詳細確認が必要。ゼネスのマルチテレコム株式10,000,000円は子会社純資産評価（△10,139,159円）に基づき全額修正。
+  </div>
+
+  <div class="section-title">2.3 長期借入金の詳細</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="text-align:left">借入先</th><th>借入金額</th><th>2025/4期残高</th><th style="text-align:left">種別</th><th>金利</th><th style="text-align:left">開始日</th><th>年数</th></tr></thead>
+      <tbody>
+        <tr><td>城北信用金庫</td><td>20,000,000</td><td>16,880,000</td><td>コロナ融資（固定）</td><td>1.4%</td><td>2021/3/26</td><td>10年</td></tr>
+        <tr><td>巣鴨信用金庫</td><td>12,000,000</td><td>9,400,000</td><td>コロナ融資（固定）</td><td>0.9%</td><td>2024/4/27</td><td>5年</td></tr>
+        <tr class="row-section"><td colspan="7">簿外（プロパー短期転がし）</td></tr>
+        <tr style="opacity:0.6"><td>城北信用金庫</td><td>30,000,000</td><td>—</td><td>プロパー短期</td><td>1.45%</td><td>毎年決算前返済・再借入</td><td>—</td></tr>
+        <tr style="opacity:0.6"><td>巣鴨信用金庫</td><td>15,000,000</td><td>—</td><td>プロパー短期</td><td>0.9%</td><td>毎年決算前返済・再借入</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="analysis-box">
+    <div class="analysis-label">分析コメント</div>
+    返済に滞りはなし。プロパー融資での借入能力（簿外4,500万円）が追加的な財務余力として存在する。
+  </div>
+</div>
+
+<!-- TAB 3: CHAPTER 3 -->
+<div id="tab3" class="tab-pane">
+  <div class="chapter-title">
+    <span class="chapter-number">Chapter 03</span>
+    <h2>事業性の検証</h2>
+    <div class="chapter-title-line"></div>
+  </div>
+
+  <div class="section-title">3.1 ３期損益計算書推移</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align:left">科目</th><th>2023/4期</th><th>2024/4期</th><th>2025/4期</th>
+          <th>2026予測<br><span style="font-size:10px;opacity:0.7">（25〜30%減）</span></th>
+          <th>以後予測<br><span style="font-size:10px;opacity:0.7">（potential）</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-total"><td>売上高</td><td>253,326,600</td><td>194,090,119</td><td>166,524,001</td><td>120,000,000</td><td>200,000,000</td></tr>
+        <tr><td>売上原価</td><td>122,179,872</td><td>78,136,221</td><td>78,525,320</td><td>57,000,000</td><td>89,000,000</td></tr>
+        <tr class="row-total"><td>売上総利益</td><td>131,146,728</td><td>115,953,898</td><td>87,999,500</td><td>63,000,000</td><td>111,000,000</td></tr>
+        <tr><td>未成工事支出金差異</td><td class="negative-val">△1,281,547</td><td class="positive-val">1,400,975</td><td class="negative-val">△10,223,975</td><td>10,000,000</td><td>0</td></tr>
+        <tr><td>人件費（工事部員）</td><td>55,970,752</td><td>56,138,420</td><td>50,012,848</td><td>50,000,000</td><td>50,000,000</td></tr>
+        <tr><td>販売管理費（金子/川嶋/金子英）</td><td>51,028,870</td><td>52,442,184</td><td>46,620,823</td><td>46,000,000</td><td>46,000,000</td></tr>
+        <tr class="row-total"><td>営業利益</td><td class="positive-val">25,428,653</td><td>5,972,319</td><td>1,588,985</td><td class="negative-val">△23,000,000</td><td class="positive-val">15,000,000</td></tr>
+        <tr><td>営業外収益</td><td>582,576</td><td>1,200,738</td><td>321,057</td><td>400,000</td><td>400,000</td></tr>
+        <tr><td>営業外費用（支払利息等）</td><td>457,815</td><td>682,543</td><td>864,089</td><td>900,000</td><td>900,000</td></tr>
+        <tr class="row-total"><td>経常利益</td><td class="positive-val">25,553,414</td><td>6,490,514</td><td>1,045,953</td><td class="negative-val">△23,500,000</td><td class="positive-val">14,500,000</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">3.2 売上高分析（取引先別）</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align:left">取引先</th><th>2023/4期</th><th>2024/4期</th><th>2025/4期</th>
+          <th>売上レンジ</th><th style="text-align:left">取引条件</th><th style="text-align:left">備考</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>ネットワンシステムズ</td><td>108,294,000</td><td>98,722,000</td><td>75,336,030</td><td>100,000,000</td><td>15締/翌月10日・末締/翌月末</td><td>スポット案件減少傾向</td></tr>
+        <tr><td class="negative-val">岡田電機</td><td>58,287,000</td><td>32,139,819</td><td>7,987,000</td><td class="negative-val">0</td><td>末締翌月末</td><td>10Xへと変換</td></tr>
+        <tr><td>エイチシーネットワークス</td><td>27,865,000</td><td>20,340,000</td><td>19,634,910</td><td>25,000,000</td><td>末締翌月20日</td><td>東京農工大・都立大学</td></tr>
+        <tr><td class="negative-val">アメリカンエンジニア</td><td>33,823,000</td><td>6,332,800</td><td>0</td><td class="negative-val">0</td><td>末締翌月末</td><td>米軍案件 単価合わず拒否</td></tr>
+        <tr><td class="negative-val">NSK</td><td>13,135,000</td><td>16,753,700</td><td>2,176,000</td><td class="negative-val">0</td><td>末締翌月末</td><td>西友案件が収束</td></tr>
+        <tr><td>埼玉アンテナシステム</td><td>8,422,400</td><td>8,325,800</td><td>7,491,400</td><td>8,000,000</td><td>末締翌月末</td><td>藤田氏 単価契約</td></tr>
+        <tr><td class="positive-val">10X</td><td>0</td><td>0</td><td>23,083,000</td><td class="positive-val">30,000,000</td><td>末締翌月末</td><td>新規・成長中</td></tr>
+        <tr><td>ハイアーネット</td><td>581,500</td><td>1,254,000</td><td>5,735,000</td><td>5,000,000</td><td>末締翌月末</td><td>—</td></tr>
+        <tr><td>エクストリーク</td><td>0</td><td>3,456,000</td><td>560,000</td><td>3,000,000</td><td>末締翌月末</td><td>スバル案件</td></tr>
+        <tr><td>新生テクノス</td><td>0</td><td>0</td><td>2,655,000</td><td>3,000,000</td><td>末締翌月末</td><td>JR東案件</td></tr>
+        <tr><td>サンテレホン</td><td>2,188,000</td><td>3,930,000</td><td>2,468,660</td><td>3,000,000</td><td>末締翌月末</td><td>設計やサーベイ</td></tr>
+        <tr style="opacity:0.6"><td>アスピレーション</td><td>0</td><td>153,000</td><td>16,982,820</td><td class="negative-val">0</td><td>末締翌月末</td><td>2025/4期のみ・利益なし</td></tr>
+        <tr class="row-total"><td>売上高合計</td><td>253,326,600</td><td>194,090,119</td><td>166,524,820</td><td>187,500,000</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">3.3 売上原価分析</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="text-align:left">科目</th><th>2023/4期</th><th>2024/4期</th><th>2025/4期</th><th>支払レンジ</th><th style="text-align:left">備考</th></tr></thead>
+      <tbody>
+        <tr><td>材料費</td><td>45,279,359</td><td>19,022,798</td><td>28,790,614</td><td>27,000,000〜30,000,000</td><td>材料棚卸高の根拠不明</td></tr>
+        <tr style="background:#0f0f0f"><td style="color:var(--text-muted);font-size:11px">　売上比率</td><td style="color:var(--text-muted)">17.87%</td><td style="color:var(--text-muted)">9.80%</td><td style="color:var(--text-muted)">17.29%</td><td style="color:var(--accent-dim)">15%程度</td><td>—</td></tr>
+        <tr><td>外注費</td><td>73,633,176</td><td>54,835,000</td><td>47,373,344</td><td>50,400,000〜56,000,000</td><td>—</td></tr>
+        <tr style="background:#0f0f0f"><td style="color:var(--text-muted);font-size:11px">　売上比率</td><td style="color:var(--text-muted)">29.07%</td><td style="color:var(--text-muted)">28.25%</td><td style="color:var(--text-muted)">28.45%</td><td style="color:var(--accent-dim)">28%程度</td><td>—</td></tr>
+        <tr><td>製造経費（人件費除く）</td><td>3,267,337</td><td>4,278,423</td><td>2,361,362</td><td>2,700,000〜3,000,000</td><td>—</td></tr>
+        <tr class="row-total"><td>売上原価合計</td><td>122,179,872</td><td>78,136,221</td><td>78,525,320</td><td>—</td><td>—</td></tr>
+        <tr class="row-total"><td>売上総利益</td><td class="positive-val">131,146,728</td><td class="positive-val">115,953,898</td><td class="positive-val">87,999,500</td><td>99,900,000〜111,000,000</td><td>—</td></tr>
+        <tr style="background:#0f0f0f"><td style="color:var(--text-muted);font-size:11px">　利益率</td><td style="color:var(--positive)">51.77%</td><td style="color:var(--positive)">59.74%</td><td style="color:var(--positive)">52.84%</td><td style="color:var(--accent-dim)">55.5%</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="analysis-box">
+    <div class="analysis-label">分析コメント</div>
+    売上の40〜50%はネットワンシステム、大学案件（10X・エイチシー）で30%程度を占める。売上減少の背景は発注量の減少傾向とリプレイス案件の落ち着き。米軍案件は工程見通し不明・利益率悪化のため今後不参加。
+  </div>
+</div>
+
+<!-- TAB 4: CHAPTER 4 -->
+<div id="tab4" class="tab-pane">
+  <div class="chapter-title">
+    <span class="chapter-number">Chapter 04</span>
+    <h2>収益性の検証</h2>
+    <div class="chapter-title-line"></div>
+  </div>
+
+  <div class="section-title">4.1 将来損益計算書見込み（ゼネス単体）</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="text-align:left">科目</th><th>2026/4期</th><th>2027/4期</th><th>2028/4期</th><th>2029/4期</th><th style="text-align:left">備考</th></tr></thead>
+      <tbody>
+        <tr class="row-total"><td>売上高</td><td>120,000,000</td><td>200,000,000</td><td>200,000,000</td><td>200,000,000</td><td>現状維持として</td></tr>
+        <tr><td>売上原価</td><td>57,000,000</td><td>89,000,000</td><td>89,000,000</td><td>89,000,000</td><td>材料人件費高騰は加味せず</td></tr>
+        <tr class="row-total"><td>売上総利益</td><td>63,000,000</td><td>111,000,000</td><td>111,000,000</td><td>111,000,000</td><td>—</td></tr>
+        <tr><td>未成工事支出金差異</td><td class="positive-val">10,000,000</td><td>0</td><td>0</td><td>0</td><td>—</td></tr>
+        <tr><td>人件費（工事部員）</td><td>50,000,000</td><td>50,000,000</td><td>52,000,000</td><td>54,000,000</td><td>定期昇給＋賞与</td></tr>
+        <tr><td>販売管理費</td><td>46,000,000</td><td>46,000,000</td><td>48,000,000</td><td>50,000,000</td><td>定期昇給＋賞与</td></tr>
+        <tr class="row-total"><td>営業利益</td><td class="negative-val">△23,000,000</td><td class="positive-val">15,000,000</td><td class="positive-val">11,000,000</td><td class="positive-val">7,000,000</td><td>—</td></tr>
+        <tr><td>営業外収益</td><td>400,000</td><td>400,000</td><td>400,000</td><td>400,000</td><td>—</td></tr>
+        <tr><td>支払利息</td><td>900,000</td><td>900,000</td><td>900,000</td><td>900,000</td><td>—</td></tr>
+        <tr class="row-total"><td>経常利益</td><td class="negative-val">△23,500,000</td><td class="positive-val">14,500,000</td><td class="positive-val">10,500,000</td><td class="positive-val">6,500,000</td><td>—</td></tr>
+        <tr><td>特別損失（役員退職金）</td><td>0</td><td>0</td><td>0</td><td>20,000,000</td><td>2029年金子氏定年退職</td></tr>
+        <tr class="row-total"><td>税引前当期純利益</td><td class="negative-val">△23,500,000</td><td class="positive-val">14,500,000</td><td class="positive-val">10,500,000</td><td class="negative-val">△13,500,000</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">4.2 将来損益計算書見込み（10Xシナジー込み）</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="text-align:left">科目</th><th>2026/4期</th><th>2027/4期</th><th>2028/4期</th><th>2029/4期</th><th style="text-align:left">備考</th></tr></thead>
+      <tbody>
+        <tr class="row-total"><td>売上高</td><td>120,000,000</td><td>200,000,000</td><td class="positive-val">230,000,000</td><td class="positive-val">250,000,000</td><td>シナジー効果</td></tr>
+        <tr><td>売上原価</td><td>57,000,000</td><td>89,000,000</td><td>110,000,000</td><td>119,000,000</td><td>材料人件費高騰は加味せず</td></tr>
+        <tr class="row-total"><td>売上総利益</td><td>63,000,000</td><td>111,000,000</td><td class="positive-val">120,000,000</td><td class="positive-val">131,000,000</td><td>—</td></tr>
+        <tr><td>未成工事支出金差異</td><td class="positive-val">10,000,000</td><td>0</td><td>0</td><td>0</td><td>—</td></tr>
+        <tr><td>人件費（工事部員）</td><td>50,000,000</td><td>50,000,000</td><td>52,000,000</td><td>54,000,000</td><td>定期昇給＋賞与</td></tr>
+        <tr><td>販売管理費（+相木）</td><td>46,000,000</td><td>53,000,000</td><td>55,000,000</td><td>57,000,000</td><td>相木氏コスト追加</td></tr>
+        <tr class="row-total"><td>営業利益</td><td class="negative-val">△23,000,000</td><td class="positive-val">8,000,000</td><td class="positive-val">13,000,000</td><td class="positive-val">20,000,000</td><td>—</td></tr>
+        <tr><td>営業外収益</td><td>400,000</td><td>400,000</td><td>400,000</td><td>400,000</td><td>—</td></tr>
+        <tr><td>支払利息</td><td>900,000</td><td>900,000</td><td>900,000</td><td>900,000</td><td>—</td></tr>
+        <tr class="row-total"><td>経常利益</td><td class="negative-val">△23,500,000</td><td class="positive-val">7,500,000</td><td class="positive-val">12,500,000</td><td class="positive-val">19,500,000</td><td>—</td></tr>
+        <tr><td>特別損失（役員退職金）</td><td>0</td><td>0</td><td>0</td><td>20,000,000</td><td>—</td></tr>
+        <tr class="row-total"><td>税引前当期純利益</td><td class="negative-val">△23,500,000</td><td class="positive-val">7,500,000</td><td class="positive-val">12,500,000</td><td class="negative-val">△500,000</td><td>—</td></tr>
+        <tr><td>法人税等</td><td>0</td><td>2,500,000</td><td>4,000,000</td><td>0</td><td>—</td></tr>
+        <tr class="row-total"><td>当期純利益</td><td class="negative-val">△23,500,000</td><td class="positive-val">5,000,000</td><td class="positive-val">8,500,000</td><td class="negative-val">△500,000</td><td>—</td></tr>
+        <tr class="row-section"><td colspan="6">累積純資産（実態）</td></tr>
+        <tr style="background:rgba(74,222,128,0.05)">
+          <td style="color:var(--positive)">ゼネスネットワーク</td>
+          <td style="color:var(--positive)">14,384,998</td><td style="color:var(--positive)">19,384,998</td>
+          <td style="color:var(--positive)">27,884,998</td><td style="color:var(--positive)">27,384,998</td><td>—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="analysis-box">
+    <div class="analysis-label">単体 vs シナジー比較</div>
+    10Xシナジーが発現した場合、2028年以降の売上高が単体比+15〜25%増加し、2029年の営業利益が単体700万円→シナジー2,000万円へと大幅に改善。ただし2026年は引き継ぎ期として△2,350万円の経常赤字を見込む。
+  </div>
+</div>
+
+<!-- TAB 5: シナジー効果 -->
+<div id="tab5" class="tab-pane">
+  <div class="chapter-title">
+    <span class="chapter-number">Synergy</span>
+    <h2>シナジー効果</h2>
+    <div class="chapter-title-line"></div>
+  </div>
+
+  <div class="section-title">5.1 10Xの買収目的とシナジー効果</div>
+  <div class="synergy-grid">
+    <div class="synergy-item">
+      <h4>営業力 × 技術力</h4>
+      <p>10Xの営業リソースを投入し、技術者集団である対象会社の稼働率を最大化する。</p>
+    </div>
+    <div class="synergy-item">
+      <h4>大型案件への挑戦</h4>
+      <p>特定建設業ライセンス取得を視野に入れ、より大規模な公共案件へチャレンジ。</p>
+    </div>
+    <div class="synergy-item">
+      <h4>外注コストの削減</h4>
+      <p>10X案件の内製化によりグループ全体の利益率を向上させる。</p>
+    </div>
+    <div class="synergy-item">
+      <h4>拠点の共有</h4>
+      <p>倉庫付き拠点の共有による工具・計測器のリース料および物流コスト低減。</p>
+    </div>
+  </div>
+
+  <div class="section-title">5.2 ゼネスネットワークのシナジー効果</div>
+  <div class="synergy-grid">
+    <div class="synergy-item">
+      <h4>売上額の確保</h4>
+      <p>10Xの関東案件における外注費用は1億円程度。ゼネスネットワークへ集約化することで売上を確保。</p>
+    </div>
+    <div class="synergy-item">
+      <h4>人材の確保・若返り</h4>
+      <p>10Xに在籍する人員をゼネスに出向することで年齢の若返り＋リソース確保＋カルチャ交流を実現。</p>
+    </div>
+    <div class="synergy-item">
+      <h4>稼働率の最大化</h4>
+      <p>10Xの営業リソースを投入し、技術者集団である対象会社の稼働率を最大化。</p>
+    </div>
+    <div class="synergy-item">
+      <h4>管理体制強化</h4>
+      <p>10Xの管理体制をゼネスへそのまま当てはめることで管理費用の簡素化・業務効率化を図る。</p>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 6: 懸念リスク -->
+<div id="tab6" class="tab-pane">
+  <div class="chapter-title">
+    <span class="chapter-number">Risk</span>
+    <h2>懸念リスク一覧</h2>
+    <div class="chapter-title-line"></div>
+  </div>
+
+  <div class="section-title">① 組織・ガバナンスおよび法務リスク</div>
+  <div class="concern-grid">
+    <div class="concern-item critical">
+      <strong style="color:var(--text-primary)">株主間合意リスク</strong><br>
+      代表取締役 金子氏の配偶者が株式50%を保有。M&amp;A実行にあたり、配偶者からの合意取得が不可欠。合意形成が難航した場合、クロージングが遅延・不成立となるリスクがある。
+    </div>
+    <div class="concern-item critical">
+      <strong style="color:var(--text-primary)">定款の住所記載不備</strong><br>
+      定款に記載された本店所在地が「戸田市」となっているが、これは金子代表の自宅住所であり、現在の事業所所在地と相違している。登記と実態の乖離は法的リスクになるため、速やかな定款変更・登記修正が必要。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">役員数の制限（定款）</strong><br>
+      定款上、取締役の員数が「3名以内」に制限されている。買収後の経営体制構築において役員追加が困難となる可能性があり、定款変更を含む対応が必要。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">社内規定・就業規則の未整備</strong><br>
+      就業規則・給与規程・経費規程などの社内規定が整備されていないか不完全な状態。買収後のガバナンス強化・労務コンプライアンス確立に向け、規定の新設・整備が急務。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">COC条項（チェンジオブコントロール）</strong><br>
+      主要取引先・金融機関との契約にCOC条項が含まれている可能性がある。株主変更により契約解除・融資引き揚げが発生するリスクがあり、事前に全契約の精査が必要。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">金融機関への連帯保証</strong><br>
+      金子代表が金融機関借入および仕入先（材料等）との取引に個人連帯保証を提供している可能性がある。買収後の保証解除・切替交渉が難航した場合、融資条件の変更や仕入取引の継続に影響が生じるリスクがある。
+    </div>
+  </div>
+
+  <div class="section-title">② 事業・収益性の持続化リスク</div>
+  <div class="concern-grid">
+    <div class="concern-item critical">
+      <strong style="color:var(--text-primary)">売上減少トレンド</strong><br>
+      売上高は3期連続で減少（2023年→2025年：△34%）。単なる景気変動ではなく、担当者の離脱・リソース不足・案件獲得力の低下など構造的要因が含まれる可能性が高く、詳細な原因分析が必要。
+    </div>
+    <div class="concern-item critical">
+      <strong style="color:var(--text-primary)">特定顧客への依存</strong><br>
+      主要顧客はネットワン・HC等であり、依存自体は安定収益として評価できる。一方、AECやNSKなどその他顧客からの案件が減少・撤退傾向にあり、売上構成の偏りが進んでいる点が懸念される。顧客ポートフォリオの回復・再拡大が課題。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">属人的な受注構造</strong><br>
+      案件の受注・管理が特定の人物（代表・幹部）に依存しており、組織的な営業体制が構築されていない。キーマン離脱時に受注維持が困難になるリスクがある。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">子会社（マルチテレコムネット）の赤字</strong><br>
+      子会社マルチテレコムネットは債務超過状態（△10,139,159円）。赤字の構造的要因が不明であり、親会社への財務的波及リスクがある。原因の詳細把握が必要。
+    </div>
+  </div>
+
+  <div class="section-title">③ 人事・労務および許認可リスク</div>
+  <div class="concern-grid">
+    <div class="concern-item critical">
+      <strong style="color:var(--text-primary)">建設業許可のキーマン依存</strong><br>
+      建設業許可（電気工事業）の専任技術者として特定の従業員（鈴木氏）が登録されている。同氏が退職・異動した場合、許可の維持が困難となり事業継続に直接影響するリスクがある。
+    </div>
+    <div class="concern-item critical">
+      <strong style="color:var(--text-primary)">電気工事業の専任技術者リスク</strong><br>
+      電気工事業における専任技術者の資格保持者が限定されている。買収後の人員再編・退職リスクに備え、資格保持者の育成・確保計画の策定が急務。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">未払残業代・労務コンプライアンス</strong><br>
+      勤怠管理がエクセル運用であり、残業代の正確な計算・支払が担保されていない可能性がある。未払残業代が遡及請求された場合、想定外の費用が発生するリスクがある。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">親族従業員の処遇</strong><br>
+      代表の親族が従業員として在籍している。買収後の処遇については、継続雇用を含めて今後検討する必要がある。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">退職金制度の不明確さ</strong><br>
+      退職金規程が整備されていないか、制度の実態が不透明。将来の退職金債務の見積もりが困難であり、買収価格算定・PMI計画に影響するリスクがある。
+    </div>
+  </div>
+
+  <div class="section-title">④ 財務・資産評価リスク</div>
+  <div class="concern-grid">
+    <div class="concern-item critical">
+      <strong style="color:var(--text-primary)">経理フローの不備</strong><br>
+      現金取引が中心の経理文化で、担当者依存の属人的体制。仕訳処理の精度自体に大きな問題はないが、処理のスピード感や効率性に課題があり、買収後の経理体制整備・デジタル化が必要。
+    </div>
+    <div class="concern-item critical">
+      <strong style="color:var(--text-primary)">保険・投資有価証券の実価不明</strong><br>
+      生命保険・投資有価証券について時価評価が未実施。解約返戻金・現在価値が不明であり、純資産の実態把握に不確実性が残る。時価評価額通知書の取得が必要。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">未成工事の過大計上リスク</strong><br>
+      未成工事支出金の計上基準が不明確であり、進捗に見合わない過大計上が行われている可能性がある。実態把握のため工事進捗の個別確認が必要。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">設備・車両の更新コスト</strong><br>
+      5年以上経過した車両4台および融着機・フルーク等の測定機器について、近い将来の更新・修繕が必要。簿価と実態の乖離があり、将来キャッシュアウトを別途試算する必要がある。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">事務所賃貸借の譲渡制限</strong><br>
+      事務所賃貸借契約に「譲渡禁止」条項が含まれており、株主変更・会社分割・合併の際には管理会社への事前通知・承諾取得が必要。未対応の場合、契約解除リスクがある。
+    </div>
+    <div class="concern-item">
+      <strong style="color:var(--text-primary)">広告宣伝費の妥当性</strong><br>
+      広告宣伝費の計上内訳・効果測定が不明確であり、実態費用として妥当かの検証が必要。オーナー関連の私的費用が混入している可能性も排除できない。
+    </div>
+  </div>
+</div>
+
+<!-- TAB 7: スケジュール -->
+<div id="tab7" class="tab-pane">
+  <div class="chapter-title">
+    <span class="chapter-number">Schedule</span>
+    <h2>事業承継スケジュール</h2>
+    <div class="chapter-title-line"></div>
+  </div>
+
+  <div class="section-title">5.4 事業承継スケジュール</div>
+  <div class="timeline">
+    <div class="timeline-item"><div class="timeline-date">2026年2月</div><div class="timeline-desc">財務デューデリジェンス</div></div>
+    <div class="timeline-item"><div class="timeline-date">2026年4月</div><div class="timeline-desc">合意検討開始（詳細協議・条件調整）</div></div>
+    <div class="timeline-item milestone"><div class="timeline-date">2026年6月</div><div class="timeline-desc"><strong style="color:var(--accent)">最終合意</strong></div></div>
+    <div class="timeline-item milestone"><div class="timeline-date">2026年8月</div><div class="timeline-desc"><strong style="color:var(--accent)">官報公告及び手続き</strong></div></div>
+    <div class="timeline-item milestone"><div class="timeline-date">2026年9月</div><div class="timeline-desc"><strong style="color:var(--accent)">譲渡成立</strong></div></div>
+    <div class="timeline-item"><div class="timeline-date">2026年9月</div><div class="timeline-desc">相木氏 常務取締役としてJoin</div></div>
+    <div class="timeline-item"><div class="timeline-date">2027年4月</div><div class="timeline-desc">10X若手派遣及び人事交流</div></div>
+    <div class="timeline-item"><div class="timeline-date">2029年4月</div><div class="timeline-desc">金子氏定年退任（役員退職金2,000万円支給予定）</div></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
